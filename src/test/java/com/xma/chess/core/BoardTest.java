@@ -15,6 +15,16 @@ public class BoardTest {
     }
 
     @Test
+    public void printFigures() {
+        for (var type : ChessType.values()) {
+            int code = type.getCode();
+            int valueBlack = code;
+            int valueWhite = code | 8;
+            System.out.printf("черный %s  \t- %d\t|\tбелый %s  \t- %d\n", type.name(), valueBlack, type.name(), valueWhite);
+        }
+    }
+
+    @Test
     public void cellToPosition() {
         for (int row = 8; row >= 1; row--) {
             for (char col = 'a'; col <= 'h'; col++) {

@@ -7,30 +7,36 @@ public class Board {
     public Board() {
         board = new byte[64];
 
-        setFigure(ChessType.ROOK, true, 0);
-        setFigure(ChessType.ROOK, true, 7);
-        setFigure(ChessType.ROOK, false, 56);
-        setFigure(ChessType.ROOK, false, 63);
+        setFigure(ChessType.ROOK, true, 0,0);
+        setFigure(ChessType.ROOK, true, 0,7);
+        setFigure(ChessType.ROOK, false, 7,0);
+        setFigure(ChessType.ROOK, false, 7,7);
 
-        setFigure(ChessType.KNIGHT, true, 1);
-        setFigure(ChessType.KNIGHT, true, 6);
-        setFigure(ChessType.KNIGHT, false, 57);
-        setFigure(ChessType.KNIGHT, false, 62);
+        setFigure(ChessType.KNIGHT, true, 0,1);
+        setFigure(ChessType.KNIGHT, true, 0,6);
+        setFigure(ChessType.KNIGHT, false, 7,1);
+        setFigure(ChessType.KNIGHT, false, 7,6);
 
-        setFigure(ChessType.BISHOP, true, 2);
-        setFigure(ChessType.BISHOP, true, 5);
-        setFigure(ChessType.BISHOP, false, 58);
-        setFigure(ChessType.BISHOP, false, 61);
+        setFigure(ChessType.BISHOP, true, 0,2);
+        setFigure(ChessType.BISHOP, true, 0,5);
+        setFigure(ChessType.BISHOP, false, 7,2);
+        setFigure(ChessType.BISHOP, false, 7,5);
 
-        setFigure(ChessType.QUEEN, true, 3);
-        setFigure(ChessType.QUEEN, false, 59);
+        setFigure(ChessType.QUEEN, true, 0,3);
+        setFigure(ChessType.QUEEN, false, 7,3);
 
-        setFigure(ChessType.KING, true, 4);
-        setFigure(ChessType.KING, false, 60);
+        setFigure(ChessType.KING, true, 0,4);
+        setFigure(ChessType.KING, false, 7,4);
 
-        for (int i = 0; i < 8; i++) {
-            setFigure(ChessType.PAWN, true, 8 + i);
-            setFigure(ChessType.PAWN, false, 48 + i);
+        for (int pos = 0; pos < 8; pos++) {
+            setFigure(ChessType.PAWN, true, 8 + pos);
+            setFigure(ChessType.PAWN, false, 48 + pos);
+        }
+        for (int row = 2; row < 6; row++) {
+            for (int col = 0; col < 8; col++) {
+                boolean color = (row % 2 + col % 2) == 1;
+                setFigure(ChessType.NONE, color, row, col);
+            }
         }
     }
 
@@ -43,17 +49,24 @@ public class Board {
         board[position] = getFigure(type, isWhite);
     }
 
+    private void setFigure(ChessType type, boolean isWhite, int row, int col) {
+        setFigure(type, isWhite, coordinatesToPosition(row, col));
+    }
+
     private byte getFigure(ChessType type, boolean isWhite) {
-        return (byte) (type.getCode() | (isWhite ? 8 : 0));
+        int code = type.getCode();
+        int color = isWhite ? 8 : 0;
+        int value = code | color;
+        return (byte) value;
     }
 
 
     public boolean isWhite(int position) {
-        return (board[position] >> 2 & 1) >= 1;
+        return (board[position] & 8) >= 1;
     }
 
-    public boolean isWhite(int col, int row) {
-        return isWhite(row * 8 + col);
+    public boolean isWhite(int row, int col) {
+        return isWhite(coordinatesToPosition(row, col));
     }
 
     public boolean isWhite(String cell) {
@@ -65,8 +78,12 @@ public class Board {
         return board[position] == 0;
     }
 
-    public boolean isEmpty(int col, int row) {
-        return isEmpty(row * 8 + col);
+    public boolean isEmpty(int row, int col) {
+        return isEmpty(coordinatesToPosition(row, col));
+    }
+
+    private static int coordinatesToPosition(int row, int col) {
+        return row * 8 + col;
     }
 
     public boolean isEmpty(String cell) {
@@ -75,14 +92,12 @@ public class Board {
 
 
     public ChessType type(int position) {
-        int code = board[position] & 0b00000111;
-        for (ChessType v : ChessType.values())
-            if (v.getCode() == code) return v;
-        return ChessType.NONE;
+        int code = board[position] & 7;
+        return ChessType.getByCode(code);
     }
 
-    public ChessType type(int col, int row) {
-        return type(row * 8 + col);
+    public ChessType type(int row, int col) {
+        return type(coordinatesToPosition(row, col));
     }
 
     public ChessType type(String cell) {
@@ -98,22 +113,9 @@ public class Board {
         for (int row = 7; row >= 0; row--) {
             builder.append(row + 1).append("║");
             for (int col = 0; col <= 7; col++) {
-                if (isEmpty(col, row)) {
-                    int pos = (row * 8 + col);
-                    pos = (pos / 8 + pos % 8) % 2;
-                    builder.append(pos == 1 ? "◼" : "◻");
-                    if (col % 4 == 1) builder.append(' ');
-                } else {
-                    boolean isWhite = isWhite(col, row);
-                    switch (type(col, row)) {
-                        case PAWN -> builder.append(isWhite ? '♙' : '♟');
-                        case KNIGHT -> builder.append(isWhite ? '♘' : '♞');
-                        case BISHOP -> builder.append(isWhite ? '♗' : '♝');
-                        case ROOK -> builder.append(isWhite ? '♖' : '♜');
-                        case QUEEN -> builder.append(isWhite ? '♕' : '♛');
-                        case KING -> builder.append(isWhite ? '♔' : '♚');
-                    }
-                }
+                ChessType type = type(row, col);
+                builder.append(type.toChar(isWhite(row, col)));
+                if (type == ChessType.NONE && col % 4 == 1) builder.append(' ');
                 builder.append(' ');
             }
             builder.append("║").append(row + 1).append('\n');
