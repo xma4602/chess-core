@@ -2,6 +2,10 @@ package com.xma.chess.core;
 
 public class Board {
 
+    public static final int MASK_MOVE = 16;
+    public static final int MASK_COLOR = 8;
+    public static final int MASK_TYPE = 7;
+    public static final int MASK_DOUBLE_MOVE = 32;
     private byte[] board;
 
     public Board() {
@@ -54,8 +58,21 @@ public class Board {
     }
 
 
+    public boolean existPosition(int position) {
+        return 0 <= position && position <= 63;
+    }
+
+    public boolean existPosition(int row, int col) {
+        return existPosition(coordinatesToPosition(row, col));
+    }
+
+    public boolean existPosition(String cell) {
+        return existPosition(cellToPosition(cell));
+    }
+
+
     public boolean isWhite(int position) {
-        return (board[position] & 8) >= 1;
+        return (board[position] & MASK_COLOR) >= 1;
     }
 
     public boolean isWhite(int row, int col) {
@@ -63,29 +80,51 @@ public class Board {
     }
 
     public boolean isWhite(String cell) {
-        return (board[cellToPosition(cell)] >> 2 & 1) >= 1;
+        return isWhite(cellToPosition(cell));
     }
 
 
-    public boolean isEmpty(int position) {
-        return board[position] == 0;
+    public boolean isLastLine(int position) {
+        return (0 <= position && position <= 7) || (56 <= position && position <= 63);
     }
 
-    public boolean isEmpty(int row, int col) {
-        return isEmpty(coordinatesToPosition(row, col));
+    public boolean isLastLine(int row, int col) {
+        return isLastLine(coordinatesToPosition(row, col));
     }
 
-    private static int coordinatesToPosition(int row, int col) {
-        return row * 8 + col;
+    public boolean isLastLine(String cell) {
+        return isLastLine(cellToPosition(cell));
     }
 
-    public boolean isEmpty(String cell) {
-        return isEmpty(cellToPosition(cell));
+
+    public boolean wasMoving(int position) {
+        return (board[position] & MASK_MOVE) > 0;
+    }
+
+    public boolean wasMoving(int row, int col) {
+        return wasMoving(coordinatesToPosition(row, col));
+    }
+
+    public boolean wasMoving(String cell) {
+        return wasMoving(cellToPosition(cell));
+    }
+
+
+    public boolean wasDoubleMove(int position) {
+        return (board[position] & MASK_DOUBLE_MOVE) > 0;
+    }
+
+    public boolean wasDoubleMove(int row, int col) {
+        return wasDoubleMove(coordinatesToPosition(row, col));
+    }
+
+    public boolean wasDoubleMove(String cell) {
+        return wasDoubleMove(cellToPosition(cell));
     }
 
 
     public ChessType type(int position) {
-        int code = board[position] & 7;
+        int code = board[position] & MASK_TYPE;
         return ChessType.getByCode(code);
     }
 
@@ -125,6 +164,14 @@ public class Board {
             desk[i] = board[63 - 2 * (i / 8) - (i % 8)];
         }
         return new Board(desk);
+    }
+
+    public static int coordinatesToPosition(int row, int col) {
+        return row * 8 + col;
+    }
+
+    public static int[] positionToCoordinates(int position) {
+        return new int[]{position / 8, position % 8};
     }
 
     public static int cellToPosition(String cell) {
