@@ -7,31 +7,24 @@ public class Board {
     public Board() {
         board = new byte[64];
 
-        setFigure(ChessType.ROOK, true, 0,0);
-        setFigure(ChessType.ROOK, true, 0,7);
-        setFigure(ChessType.ROOK, false, 7,0);
-        setFigure(ChessType.ROOK, false, 7,7);
+        for (int row = 0; row < 8; row += 7) {
+            setFigure(ChessType.ROOK, row == 0, row, 0);
+            setFigure(ChessType.ROOK, row == 0, row, 7);
 
-        setFigure(ChessType.KNIGHT, true, 0,1);
-        setFigure(ChessType.KNIGHT, true, 0,6);
-        setFigure(ChessType.KNIGHT, false, 7,1);
-        setFigure(ChessType.KNIGHT, false, 7,6);
+            setFigure(ChessType.KNIGHT, row == 0, row, 1);
+            setFigure(ChessType.KNIGHT, row == 0, row, 6);
 
-        setFigure(ChessType.BISHOP, true, 0,2);
-        setFigure(ChessType.BISHOP, true, 0,5);
-        setFigure(ChessType.BISHOP, false, 7,2);
-        setFigure(ChessType.BISHOP, false, 7,5);
+            setFigure(ChessType.BISHOP, row == 0, row, 2);
+            setFigure(ChessType.BISHOP, row == 0, row, 5);
 
-        setFigure(ChessType.QUEEN, true, 0,3);
-        setFigure(ChessType.QUEEN, false, 7,3);
+            setFigure(ChessType.QUEEN, row == 0, row, 3);
+            setFigure(ChessType.KING, row == 0, row, 4);
 
-        setFigure(ChessType.KING, true, 0,4);
-        setFigure(ChessType.KING, false, 7,4);
-
-        for (int pos = 0; pos < 8; pos++) {
-            setFigure(ChessType.PAWN, true, 8 + pos);
-            setFigure(ChessType.PAWN, false, 48 + pos);
+            for (int col = 0; col < 8; col++) {
+                setFigure(ChessType.PAWN, row < 4, Math.abs(1 - row), col);
+            }
         }
+
         for (int row = 2; row < 6; row++) {
             for (int col = 0; col < 8; col++) {
                 boolean color = (row % 2 + col % 2) == 1;
