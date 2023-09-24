@@ -3,6 +3,7 @@ package com.xma.chess.core.figures;
 import com.xma.chess.core.Action;
 import com.xma.chess.core.Board;
 import com.xma.chess.core.ChessType;
+import com.xma.chess.core.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,31 +22,23 @@ public class Pawn extends Figure {
 
 
     @Override
-    public List<Action> getActions(int position) {
+    public List<Action> getActions(Position position) {
         actions = new ArrayList<>();
+        boolean isWhite = board.isWhite(position);
 
-        if (board.isWhite(position)) {
-            add(moveForward(position, position + 8));
-            add(moveDoubleForward(position, position + 16));
-            add(eat(true, position, position + 7));
-            add(eat(true, position, position + 9));
-            add(take(true, position, position - 1));
-            add(take(true, position, position + 1));
-        } else {
-            add(moveForward(position, position - 8));
-            add(moveDoubleForward(position, position - 16));
-            add(eat(false, position, position - 9));
-            add(eat(false, position, position - 7));
-            add(take(false, position, position - 1));
-            add(take(false, position, position + 1));
-        }
+        add(moveForward(position, position.top(isWhite)));
+        add(moveDoubleForward(position, position.topDouble(isWhite)));
+        add(eat(isWhite, position, position.leftTop(isWhite)));
+        add(eat(isWhite, position, position.rightTop(isWhite)));
+        add(take(isWhite, position, position.left(isWhite)));
+        add(take(isWhite, position, position.right(isWhite)));
 
         return actions;
     }
 
 
-    private Action eat(boolean isWhite, int startPosition, int endPosition) {
-        if (board.existPosition(endPosition) //позиция корректна?
+    private Action eat(boolean isWhite, Position startPosition, Position endPosition) {
+        if (endPosition != null //позиция корректна?
                 && board.type(endPosition) != ChessType.NONE //на позиции не пусто?
                 && board.isWhite(endPosition) != isWhite  //на позиции противник?
         ) return Action.move(startPosition, endPosition);
@@ -53,23 +46,19 @@ public class Pawn extends Figure {
         return null;
     }
 
-    private Action take(boolean isWhite, int startPosition, int opponentPos) {
-        if (board.existPosition(opponentPos) //позиция корректна?
+    private Action take(boolean isWhite, Position startPosition, Position opponentPos) {
+        if (opponentPos != null //позиция корректна?
                 && board.type(opponentPos) != ChessType.NONE //позиция не пустая?
                 && board.isWhite(startPosition) != isWhite //на позиции противник?
                 && board.wasDoubleMove(opponentPos) //противник делал двойной ход?
         ) {
-            if (isWhite) {
-                return Action.take(startPosition, opponentPos + 8, opponentPos);
-            } else {
-                return Action.take(startPosition, opponentPos - 8, opponentPos);
-            }
+            return Action.take(startPosition, opponentPos.top(isWhite), opponentPos);
         }
         return null;
     }
 
-    private Action moveForward(int startPosition, int endPosition) {
-        if (board.existPosition(endPosition)) { //позиция корректна?
+    private Action moveForward(Position startPosition, Position endPosition) {
+        if (endPosition != null) { //позиция корректна?
             if (board.type(endPosition) == ChessType.NONE) { //на позиции пусто?
                 if (board.isLastLine(endPosition)) { //это последняя линия поля?
                     return Action.swap(startPosition, endPosition);
@@ -82,9 +71,9 @@ public class Pawn extends Figure {
     }
 
 
-    private Action moveDoubleForward(int startPosition, int endPosition) {
+    private Action moveDoubleForward(Position startPosition, Position endPosition) {
         if (!board.wasMoving(startPosition)) { //фигура не делала ход?
-            if (board.existPosition(endPosition)) { //позиция корректна?
+            if (endPosition != null) { //позиция корректна?
                 if (board.type(endPosition) == ChessType.NONE) { //на позиции пусто?
                     return Action.doubleMove(startPosition, endPosition);
                 }

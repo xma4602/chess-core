@@ -3,34 +3,34 @@ package com.xma.chess.core;
 public class Action {
 
     private final ActionType actionType;
-    int startPosition;
-    int endPosition;
-    int eatenPosition;
+    Position startPosition;
+    Position endPosition;
+    Position eatenPosition;
 
-    private Action(ActionType actionType, int startPosition, int endPosition) {
-        this(actionType, startPosition, endPosition, -1);
+    private Action(ActionType actionType, Position startPosition, Position endPosition) {
+        this(actionType, startPosition, endPosition, null);
     }
 
-    private Action(ActionType actionType, int startPosition, int endPosition, int eatenPosition) {
+    private Action(ActionType actionType, Position startPosition, Position endPosition, Position eatenPosition) {
         this.actionType = actionType;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
         this.eatenPosition = eatenPosition;
     }
 
-    public static Action move(int startPosition, int endPosition) {
+    public static Action move(Position startPosition, Position endPosition) {
         return new Action(ActionType.MOVE, startPosition, endPosition);
     }
 
-    public static Action doubleMove(int startPosition, int endPosition) {
+    public static Action doubleMove(Position startPosition, Position endPosition) {
         return new Action(ActionType.DOUBLE_MOVE, startPosition, endPosition);
     }
 
-    public static Action swap(int startPosition, int endPosition) {
+    public static Action swap(Position startPosition, Position endPosition) {
         return new Action(ActionType.SWAP, startPosition, endPosition);
     }
 
-    public static Action take(int startPosition, int endPosition, int eatenPosition) {
+    public static Action take(Position startPosition, Position endPosition, Position eatenPosition) {
         return new Action(ActionType.TAKING, startPosition, endPosition, eatenPosition);
     }
 
@@ -38,11 +38,11 @@ public class Action {
         return actionType;
     }
 
-    public int getEndPosition() {
+    public Position getEndPosition() {
         return endPosition;
     }
 
-    public int getStartPosition() {
+    public Position getStartPosition() {
         return startPosition;
     }
 
