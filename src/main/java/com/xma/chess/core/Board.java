@@ -12,7 +12,7 @@ public class Board {
     public static final int MASK_TYPE = 7;
     public static final int MASK_DOUBLE_MOVE = 32;
 
-    private byte[] board;
+    private final byte[] board;
 
     public Board() {
         board = new byte[64];
@@ -35,11 +35,8 @@ public class Board {
             }
         }
 
-        for (int row = 2; row < 6; row++) {
-            for (int col = 0; col < 8; col++) {
-                boolean color = (row % 2 + col % 2) == 1;
-                setFigure(ChessType.NONE, color, row, col);
-            }
+        for (int position = 16; position <= 47; position++) {
+            setFigure(ChessType.NONE, cellColor(position), position);
         }
     }
 
@@ -56,6 +53,10 @@ public class Board {
         setFigure(type, isWhite, Position.coordinatesToPosition(row, col));
     }
 
+    private void setFigure(int startPosition, int endPosition) {
+        board[endPosition] = board[startPosition];
+    }
+
     private byte getFigure(ChessType type, boolean isWhite) {
         int code = type.getCode();
         int color = isWhite ? 8 : 0;
@@ -67,20 +68,33 @@ public class Board {
         switch (action.getActionType()) {
             case MOVE, DOUBLE_MOVE -> {
                 ActionMove actionMove = (ActionMove) action;
-                move(actionMove.getStartPosition(), actionMove.getEndPosition());
+                move(actionMove.getStartPosition().getPosition(),
+                        actionMove.getEndPosition().getPosition()
+                );
             }
             case EAT, TAKING -> {
                 ActionEat actionEat = (ActionEat) action;
-                eat(actionEat.getStartPosition(), actionEat.getEndPosition(), actionEat.getEatenPosition());
+                eat(actionEat.getStartPosition().getPosition(),
+                        actionEat.getEndPosition().getPosition(),
+                        actionEat.getEatenPosition().getPosition()
+                );
             }
             case SWAP -> {
                 ActionSwap actionSwap = (ActionSwap) action;
-                swap(actionSwap.getStartPosition(), actionSwap.getEndPosition(), actionSwap.getSwapType(), actionSwap.isWhite());
+                swap(actionSwap.getStartPosition().getPosition(),
+                        actionSwap.getEndPosition().getPosition(),
+                        actionSwap.getSwapType(),
+                        actionSwap.isWhite()
+                );
             }
             case CASTLING -> {
                 ActionCastling actionCastling = (ActionCastling) action;
-                move(actionCastling.getStartPosition(), actionCastling.getEndPosition());
-                move(actionCastling.getRookStartPosition(), actionCastling.getRookEndPosition());
+                move(actionCastling.getStartPosition().getPosition()
+                        , actionCastling.getEndPosition().getPosition()
+                );
+                move(actionCastling.getRookStartPosition().getPosition(),
+                        actionCastling.getRookEndPosition().getPosition()
+                );
             }
         }
     }
@@ -106,18 +120,20 @@ public class Board {
         return ChessType.getByCode(board[position.getPosition()] & MASK_TYPE);
     }
 
-    public void print(){
+    public void print() {
         print(false);
     }
+
     public void print(boolean reverse) {
         StringBuilder b = new StringBuilder("A  B  C D  E F  G  H");
-        if (reverse) b = b.reverse();
+        if (reverse) b.reverse();
+
 
         StringBuilder builder = new StringBuilder("  ");
         builder.append(b);
         builder.append("\n ╔═════════════════════╗\n");
         for (int row = 7; row >= 0; row--) {
-            if (reverse) builder.append(9-row);
+            if (reverse) builder.append(9 - row);
             else builder.append(row + 1);
             builder.append("║");
             for (int col = 0; col <= 7; col++) {
@@ -127,7 +143,7 @@ public class Board {
                 builder.append(' ');
             }
             builder.append("║");
-            if (reverse) builder.append(9-row);
+            if (reverse) builder.append(9 - row);
             else builder.append(row + 1);
             builder.append('\n');
         }
@@ -146,13 +162,21 @@ public class Board {
     }
 
 
-    private void swap(Position startPosition, Position endPosition, ChessType swapType, boolean white) {
+    private void swap(int startPosition, int endPosition, ChessType swapType, boolean isWhite) {
+        setFigure(ChessType.NONE, cellColor(startPosition), startPosition);
+        setFigure(swapType, isWhite, endPosition);
     }
 
-    private void eat(Position startPosition, Position endPosition, Position eatenPosition) {
+    private void eat(int startPosition, int endPosition, int eatenPosition) {
+        setFigure(startPosition, endPosition);
+        if (endPosition != eatenPosition) {
+            setFigure(ChessType.NONE, cellColor(eatenPosition), eatenPosition);
+        }
+        setFigure(ChessType.NONE, cellColor(startPosition), startPosition);
     }
 
-    private void move(Position startPosition, Position endPosition) {
+    private void move(int startPosition, int endPosition) {
+        board[endPosition] = board[startPosition];
     }
 
 
@@ -176,5 +200,8 @@ public class Board {
         return ChessType.getByCode(board[position] & MASK_TYPE);
     }
 
+    private static boolean cellColor(int position) {
+        return (position / 8 + position % 8) % 2 == 1;
+    }
 
 }
