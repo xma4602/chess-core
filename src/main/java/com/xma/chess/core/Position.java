@@ -35,7 +35,7 @@ public class Position {
             throw new IllegalArgumentException("Value of row must be in range [1, 8], but was " + row);
         }
 
-        this.position = celToPosition(cell);
+        this.position = cellToPosition(cell);
     }
 
 
@@ -120,8 +120,11 @@ public class Position {
         return row * 8 + column;
     }
 
-    public static int celToPosition(String cell) {
+    public static int cellToPosition(String cell) {
         return (cell.charAt(0) - 'a') + (cell.charAt(1) - '1') * 8;
     }
 
+    public static String positionToCell(int position) {
+        return String.valueOf((char) ((position % 8) + 'a')) + (char) ((position / 8) + '1');
+    }
 }

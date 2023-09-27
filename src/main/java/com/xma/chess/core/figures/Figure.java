@@ -1,6 +1,6 @@
 package com.xma.chess.core.figures;
 
-import com.xma.chess.core.Action;
+import com.xma.chess.core.actions.Action;
 import com.xma.chess.core.Board;
 import com.xma.chess.core.Position;
 

@@ -1,11 +1,17 @@
 package com.xma.chess.core;
 
+import com.xma.chess.core.actions.Action;
+import com.xma.chess.core.actions.ActionEat;
+import com.xma.chess.core.actions.ActionMove;
+import com.xma.chess.core.actions.ActionSwap;
+
 public class Board {
 
     public static final int MASK_MOVE = 16;
     public static final int MASK_COLOR = 8;
     public static final int MASK_TYPE = 7;
     public static final int MASK_DOUBLE_MOVE = 32;
+
     private byte[] board;
 
     public Board() {
@@ -57,6 +63,29 @@ public class Board {
         return (byte) value;
     }
 
+    public void make(Action action) {
+        switch (action.getActionType()) {
+            case MOVE, DOUBLE_MOVE -> {
+                ActionMove actionMove = (ActionMove) action;
+                move(actionMove.getStartPosition(), actionMove.getEndPosition());
+            }
+            case EAT, TAKING -> {
+                ActionEat actionEat = (ActionEat) action;
+                eat(actionEat.getStartPosition(), actionEat.getEndPosition(), actionEat.getEatenPosition());
+            }
+            case SWAP -> {
+                ActionSwap actionSwap = (ActionSwap) action;
+                swap(actionSwap.getStartPosition(), actionSwap.getEndPosition(), actionSwap.getSwapType(), actionSwap.isWhite());
+            }
+            case CASTLING -> {
+                ActionCastling actionCastling = (ActionCastling) action;
+                move(actionCastling.getStartPosition(), actionCastling.getEndPosition());
+                move(actionCastling.getRookStartPosition(), actionCastling.getRookEndPosition());
+            }
+        }
+    }
+
+
     public boolean isWhite(Position position) {
         return (board[position.getPosition()] & MASK_COLOR) >= 1;
     }
@@ -77,23 +106,33 @@ public class Board {
         return ChessType.getByCode(board[position.getPosition()] & MASK_TYPE);
     }
 
-    public void print() {
-        String letters = "  A  B  C D  E F  G  H\n";
-        StringBuilder builder = new StringBuilder();
-        builder.append(letters);
-        builder.append(" ╔═════════════════════╗\n");
+    public void print(){
+        print(false);
+    }
+    public void print(boolean reverse) {
+        StringBuilder b = new StringBuilder("A  B  C D  E F  G  H");
+        if (reverse) b = b.reverse();
+
+        StringBuilder builder = new StringBuilder("  ");
+        builder.append(b);
+        builder.append("\n ╔═════════════════════╗\n");
         for (int row = 7; row >= 0; row--) {
-            builder.append(row + 1).append("║");
+            if (reverse) builder.append(9-row);
+            else builder.append(row + 1);
+            builder.append("║");
             for (int col = 0; col <= 7; col++) {
                 ChessType type = type(row * 8 + col);
                 builder.append(type.toChar(isWhite(row * 8 + col)));
                 if (type == ChessType.NONE && col % 4 == 1) builder.append(' ');
                 builder.append(' ');
             }
-            builder.append("║").append(row + 1).append('\n');
+            builder.append("║");
+            if (reverse) builder.append(9-row);
+            else builder.append(row + 1);
+            builder.append('\n');
         }
-        builder.append(" ╚═════════════════════╝\n");
-        builder.append(letters);
+        builder.append(" ╚═════════════════════╝\n  ");
+        builder.append(b);
 
         System.out.println(builder);
     }
@@ -105,6 +144,17 @@ public class Board {
         }
         return new Board(desk);
     }
+
+
+    private void swap(Position startPosition, Position endPosition, ChessType swapType, boolean white) {
+    }
+
+    private void eat(Position startPosition, Position endPosition, Position eatenPosition) {
+    }
+
+    private void move(Position startPosition, Position endPosition) {
+    }
+
 
     private boolean isWhite(int position) {
         return (board[position] & MASK_COLOR) >= 1;
