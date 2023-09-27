@@ -18,9 +18,8 @@ public class BoardTest {
     public void printFigures() {
         for (var type : ChessType.values()) {
             int code = type.getCode();
-            int valueBlack = code;
             int valueWhite = code | 8;
-            System.out.printf("черный %s  \t- %d\t|\tбелый %s  \t- %d\n", type.name(), valueBlack, type.name(), valueWhite);
+            System.out.printf("черный %s  \t- %d\t|\tбелый %s  \t- %d\n", type.name(), code, type.name(), valueWhite);
         }
     }
 

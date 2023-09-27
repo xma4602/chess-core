@@ -1,5 +1,6 @@
-package com.xma.chess.core;
+package com.xma.chess.core.actions;
 
+import com.xma.chess.core.Position;
 import com.xma.chess.core.actions.ActionMove;
 
 public class ActionCastling extends ActionMove {

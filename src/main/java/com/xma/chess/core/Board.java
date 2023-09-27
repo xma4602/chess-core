@@ -1,9 +1,9 @@
 package com.xma.chess.core;
 
-import com.xma.chess.core.actions.Action;
-import com.xma.chess.core.actions.ActionEat;
-import com.xma.chess.core.actions.ActionMove;
-import com.xma.chess.core.actions.ActionSwap;
+import com.xma.chess.core.actions.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Board {
 
@@ -99,6 +99,15 @@ public class Board {
         }
     }
 
+    public List<Position> figurePositions(boolean forWhite){
+        List<Position> positions = new ArrayList<>(16);
+        for (int pos = 0; pos <= 63; pos++) {
+            if (isWhite(pos)){
+                positions.add(new Position(pos));
+            }
+        }
+        return positions;
+    }
 
     public boolean isWhite(Position position) {
         return (board[position.getPosition()] & MASK_COLOR) >= 1;
